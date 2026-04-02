@@ -12,12 +12,12 @@ const API_URL = process.env.TRADOVATE_API_URL || "https://demo.tradovateapi.com/
 export class TradovateClient {
   private accessToken: string | null = null;
   private tokenExpiry: Date | null = null;
-  private apiKey: string;
-  private apiSecret: string;
+  private username: string;
+  private password: string;
 
-  constructor(encryptedKey: string, encryptedSecret: string) {
-    this.apiKey = decrypt(encryptedKey);
-    this.apiSecret = decrypt(encryptedSecret);
+  constructor(encryptedUsername: string, encryptedPassword: string) {
+    this.username = decrypt(encryptedUsername);
+    this.password = decrypt(encryptedPassword);
   }
 
   private async authenticate(): Promise<void> {
@@ -29,8 +29,8 @@ export class TradovateClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: this.apiKey,
-        password: this.apiSecret,
+        name: this.username,
+        password: this.password,
         appId: "PropDash",
         appVersion: "1.0.0",
       }),
@@ -92,10 +92,9 @@ export class TradovateClient {
   }
 }
 
-// Factory for creating a client from encrypted DB credentials
 export async function createTradovateClient(
-  encryptedKey: string,
-  encryptedSecret: string
+  encryptedUsername: string,
+  encryptedPassword: string
 ): Promise<TradovateClient> {
-  return new TradovateClient(encryptedKey, encryptedSecret);
+  return new TradovateClient(encryptedUsername, encryptedPassword);
 }

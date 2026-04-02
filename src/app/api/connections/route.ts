@@ -36,9 +36,8 @@ export async function GET() {
 }
 
 const createConnectionSchema = z.object({
-  broker: z.string().min(1, "Broker is required"),
-  apiKey: z.string().min(1, "API key is required"),
-  apiSecret: z.string().min(1, "API secret is required"),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export async function POST(req: Request) {
@@ -50,17 +49,17 @@ export async function POST(req: Request) {
     const userId = (session.user as any).id;
 
     const body = await req.json();
-    const { broker, apiKey, apiSecret } = createConnectionSchema.parse(body);
+    const { username, password } = createConnectionSchema.parse(body);
 
-    const apiKeyEncrypted = encrypt(apiKey);
-    const apiSecEncrypted = encrypt(apiSecret);
+    const usernameEncrypted = encrypt(username);
+    const passwordEncrypted = encrypt(password);
 
     const connection = await prisma.brokerConnection.create({
       data: {
         userId,
-        broker,
-        apiKeyEncrypted,
-        apiSecEncrypted,
+        broker: "tradovate",
+        usernameEncrypted,
+        passwordEncrypted,
       },
       select: {
         id: true,

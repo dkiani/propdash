@@ -35,9 +35,9 @@ model BrokerConnection {
   id              String    @id @default(cuid())
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  broker          String
-  apiKeyEncrypted String
-  apiSecEncrypted String
+  broker            String
+  usernameEncrypted String
+  passwordEncrypted String
   isValid         Boolean   @default(true)
   lastSyncAt      DateTime?
   createdAt       DateTime  @default(now())

@@ -14,8 +14,8 @@ export async function syncAccount(accountId: string): Promise<void> {
   if (!account) throw new Error(`Account ${accountId} not found`);
 
   const client = new TradovateClient(
-    account.connection.apiKeyEncrypted,
-    account.connection.apiSecEncrypted
+    account.connection.usernameEncrypted,
+    account.connection.passwordEncrypted
   );
 
   try {

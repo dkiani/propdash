@@ -5,8 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { verifyTradovateCredentials } from "@/lib/tradovate/auth";
 
 const verifySchema = z.object({
-  apiKey: z.string().min(1, "API key is required"),
-  apiSecret: z.string().min(1, "API secret is required"),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export async function POST(req: Request) {
@@ -17,9 +17,9 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { apiKey, apiSecret } = verifySchema.parse(body);
+    const { username, password } = verifySchema.parse(body);
 
-    const result = await verifyTradovateCredentials(apiKey, apiSecret);
+    const result = await verifyTradovateCredentials(username, password);
 
     if (!result.success) {
       return NextResponse.json(

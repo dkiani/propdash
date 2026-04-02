@@ -91,8 +91,8 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
 
   // Step 1 — Connection state
-  const [apiKey, setApiKey] = useState("");
-  const [apiSecret, setApiSecret] = useState("");
+  const [tvUsername, setTvUsername] = useState("");
+  const [tvPassword, setTvPassword] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState("");
   const [verifySuccess, setVerifySuccess] = useState(false);
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/connections/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey, apiSecret }),
+        body: JSON.stringify({ username: tvUsername, password: tvPassword }),
       });
 
       const data = await res.json();
@@ -149,7 +149,7 @@ export default function OnboardingPage() {
       const saveRes = await fetch("/api/connections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey, apiSecret }),
+        body: JSON.stringify({ username: tvUsername, password: tvPassword }),
       });
 
       if (saveRes.ok) {
@@ -280,39 +280,37 @@ export default function OnboardingPage() {
                 Connect Tradovate
               </h2>
               <p className="text-sm text-text-secondary">
-                We need your Tradovate API credentials to sync your accounts and
-                trades.
+                Sign in with your Tradovate credentials. We&apos;ll securely connect
+                to pull your account data. Read-only — we never place trades.
               </p>
             </div>
 
             <div className="bg-bg-elevated rounded-lg p-4 space-y-3">
               <p className="text-xs text-text-muted uppercase tracking-wider font-medium">
-                How to get your API credentials
+                How it works
               </p>
               <ol className="text-sm text-text-secondary space-y-2 list-decimal list-inside">
-                <li>Log in to your Tradovate account</li>
-                <li>
-                  Go to <span className="text-text-primary font-medium">Settings &rarr; API Access</span>
-                </li>
-                <li>Generate a new API key and secret</li>
-                <li>Copy both values and paste them below</li>
+                <li>Enter the same username and password you use to log into Tradovate</li>
+                <li>We verify your credentials and find your accounts</li>
+                <li>Your credentials are encrypted and stored securely (AES-256)</li>
+                <li>PropDash syncs your balances and trades automatically</li>
               </ol>
             </div>
 
             <div className="space-y-4">
               <Input
-                label="API Key"
+                label="Tradovate Username"
                 type="text"
-                placeholder="Enter your Tradovate API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your Tradovate username"
+                value={tvUsername}
+                onChange={(e) => setTvUsername(e.target.value)}
               />
               <Input
-                label="API Secret"
+                label="Tradovate Password"
                 type="password"
-                placeholder="Enter your Tradovate API secret"
-                value={apiSecret}
-                onChange={(e) => setApiSecret(e.target.value)}
+                placeholder="Enter your Tradovate password"
+                value={tvPassword}
+                onChange={(e) => setTvPassword(e.target.value)}
               />
             </div>
 
@@ -368,15 +366,8 @@ export default function OnboardingPage() {
             )}
 
             <p className="text-xs text-text-muted">
-              Having trouble?{" "}
-              <a
-                href="https://docs.tradovate.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent-gold hover:underline"
-              >
-                View Tradovate API docs
-              </a>
+              Your credentials are encrypted with AES-256 and never exposed to
+              the browser. We only read account data — we cannot place trades.
             </p>
 
             <div className="flex gap-3">
@@ -398,7 +389,7 @@ export default function OnboardingPage() {
                 <Button
                   onClick={handleVerifyConnection}
                   isLoading={isVerifying}
-                  disabled={!apiKey || !apiSecret}
+                  disabled={!tvUsername || !tvPassword}
                   className="flex-1"
                 >
                   Verify Connection &rarr;
