@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  connections    BrokerConnection[]
+  accounts       PropAccount[]
+  routineEntries RoutineEntry[]
+  settings       UserSettings?
+}
+
+model UserSettings {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyProfitTarget   Float?
+  maxTradesPerDay     Int?
+  stopAfterConsecLoss Int?    @default(2)
+  emailWrapped        Boolean @default(true)
+  timezone            String  @default("America/New_York")
+}
+
+model BrokerConnection {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  broker          String
+  apiKeyEncrypted String
+  apiSecEncrypted String
+  isValid         Boolean   @default(true)
+  lastSyncAt      DateTime?
+  createdAt       DateTime  @default(now())
+
+  accounts PropAccount[]
+}
+
+model PropFirmPlan {
+  id                  String  @id @default(cuid())
+  firmName            String
+  planName            String
+  startingBalance     Float
+  drawdownType        String
+  maxDrawdown         Float
+  profitTarget        Float?
+  minTradingDays      Int?
+  consistencyRuleType String?
+  consistencyValue    Float?
+  maxDailyLoss        Float?
+  maxContracts        Int?
+  payoutThreshold     Float?
+  payoutSchedule      String?
+  minPayoutDays       Int?
+  isCustom            Boolean @default(false)
+
+  accounts PropAccount[]
+
+  @@unique([firmName, planName])
+}
+
+model PropAccount {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connectionId      String
+  connection        BrokerConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  planId            String
+  plan              PropFirmPlan @relation(fields: [planId], references: [id])
+
+  externalAccountId String
+  accountName       String?
+  accountType       String
+  status            String    @default("active")
+
+  currentBalance    Float
+  highWaterMark     Float
+  drawdownFloor     Float
+  drawdownRemaining Float
+  tradingDaysCount  Int       @default(0)
+
+  lastSyncAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  trades          Trade[]
+  dailySnapshots  DailySnapshot[]
+}
+
+model Trade {
+  id             String    @id @default(cuid())
+  accountId      String
+  account        PropAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  externalFillId String    @unique
+  instrument     String
+  side           String
+  entryPrice     Float
+  exitPrice      Float?
+  quantity       Int
+  realizedPnl    Float?
+  commission     Float?
+  entryTime      DateTime
+  exitTime       DateTime?
+  duration       Int?
+
+  createdAt      DateTime  @default(now())
+}
+
+model DailySnapshot {
+  id                String   @id @default(cuid())
+  accountId         String
+  account           PropAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  date              DateTime @db.Date
+  openBalance       Float
+  closeBalance      Float
+  highBalance       Float
+  lowBalance        Float
+  dailyPnl          Float
+  tradeCount        Int
+  winCount          Int
+  lossCount         Int
+  drawdownFloor     Float
+  drawdownRemaining Float
+
+  @@unique([accountId, date])
+}
+
+model RoutineEntry {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date           DateTime  @db.Date
+  mood           String
+  sleep          String
+  outsideStress  String
+  journal        String?
+  rulesCommitted Boolean   @default(false)
+  breathworkDone Boolean   @default(false)
+  completedAt    DateTime?
+
+  @@unique([userId, date])
+}
